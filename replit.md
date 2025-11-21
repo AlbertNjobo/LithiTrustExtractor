@@ -205,11 +205,19 @@ npm run db:push
 ```
 
 ### Environment Variables
-Required secrets (automatically managed by Replit):
+
+### Required Secrets (Automatically Managed)
 - `DATABASE_URL` - PostgreSQL connection string
 - `SESSION_SECRET` - Session encryption key
 - `REPL_ID` - Replit OAuth client ID
 - `ISSUER_URL` - OAuth issuer URL
+
+### Optional Blockchain Variables (For Full Blockchain Functionality)
+- `POLYGON_RPC_URL` - Polygon RPC endpoint (default: public Mumbai RPC)
+- `BLOCKCHAIN_PRIVATE_KEY` - Wallet private key for signing transactions
+- `BLOCKCHAIN_CONTRACT_ADDRESS` - Smart contract address (Phase 3)
+
+**See BLOCKCHAIN_SETUP.md for detailed configuration instructions**
 
 ## Design Principles
 

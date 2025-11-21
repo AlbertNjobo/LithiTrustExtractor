@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || "");
 
 const LITHITRUST_SYSTEM_PROMPT = `You are LithiBot, an AI assistant for LithiTrust - a blockchain-based lithium traceability platform in Zimbabwe. 
 

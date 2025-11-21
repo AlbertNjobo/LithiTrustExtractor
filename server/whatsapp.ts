@@ -12,11 +12,13 @@ const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 // Clean up old sessions
 setInterval(() => {
   const now = Date.now();
-  for (const [key, session] of conversationSessions.entries()) {
+  const keysToDelete: string[] = [];
+  conversationSessions.forEach((session, key) => {
     if (now - session.lastMessageTime > SESSION_TIMEOUT_MS) {
-      conversationSessions.delete(key);
+      keysToDelete.push(key);
     }
-  }
+  });
+  keysToDelete.forEach(key => conversationSessions.delete(key));
 }, 60000); // Check every minute
 
 function getOrCreateSession(phoneNumber: string): ConversationSession {

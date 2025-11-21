@@ -54,6 +54,7 @@ export const batches = pgTable("batches", {
   lithiumContent: decimal("lithium_content", { precision: 5, scale: 2 }).notNull(), // percentage
   currentStage: varchar("current_stage").notNull().default("mining"), // mining, processing, export, delivered
   status: varchar("status").notNull().default("active"), // active, verified, completed
+  verificationStatus: varchar("verification_status").notNull().default("unverified"), // unverified, pending, auditor-verified, government-certified
   blockchainHash: varchar("blockchain_hash").notNull(), // simulated blockchain hash
   qrCode: text("qr_code"), // QR code data
   createdBy: varchar("created_by").notNull().references(() => users.id),

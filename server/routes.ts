@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { blockchain } from "./blockchain";
 import { chatWithLithiBot } from "./chatbot";
+import { handleWhatsAppMessage, formatWhatsAppResponse, validateTwilioWebhook } from "./whatsapp";
 import { insertBatchSchema, insertEsgRecordSchema, insertEsgDocumentSchema } from "@shared/schema";
 import { z } from "zod";
 
@@ -300,6 +301,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // WhatsApp webhook endpoint
+  app.post("/api/whatsapp/webhook", async (req: any, res) => {
+    try {
+      const { From, Body } = req.body;
+
+      // Validate Twilio webhook signature if token provided
+      if (process.env.TWILIO_AUTH_TOKEN) {
+        const signature = req.get("X-Twilio-Signature") || "";
+        const isValid = validateTwilioWebhook(req.body, process.env.TWILIO_AUTH_TOKEN, "", signature);
+        if (!isValid) {
+          return res.status(403).json({ message: "Invalid Twilio request" });
+        }
+      }
+
+      if (!From || !Body) {
+        return res.status(400).json({ message: "Missing From or Body parameter" });
+      }
+
+      // Extract phone number (remove 'whatsapp:' prefix if present)
+      const phoneNumber = From.replace("whatsapp:", "");
+
+      // Get LithiBot response
+      const response = await handleWhatsAppMessage(phoneNumber, Body);
+      const formattedResponse = formatWhatsAppResponse(response);
+
+      // Return response in Twilio format (XML)
+      res.type("text/xml");
+      res.send(`<?xml version="1.0" encoding="UTF-8"?>
+        <Response>
+          <Message>${escapeXml(formattedResponse)}</Message>
+        </Response>
+      `);
+    } catch (error) {
+      console.error("WhatsApp webhook error:", error);
+      res.type("text/xml");
+      res.send(`<?xml version="1.0" encoding="UTF-8"?>
+        <Response>
+          <Message>Sorry, I encountered an error. Please try again later.</Message>
+        </Response>
+      `);
+    }
+  });
+
+  // WhatsApp webhook GET (for Twilio verification)
+  app.get("/api/whatsapp/webhook", (req, res) => {
+    // Twilio uses GET for webhook verification
+    res.type("text/xml");
+    res.send(`<?xml version="1.0" encoding="UTF-8"?>
+      <Response></Response>
+    `);
+  });
+
   const httpServer = createServer(app);
   return httpServer;
+}
+
+function escapeXml(unsafe: string): string {
+  return unsafe
+    .replace(/[<]/g, "&lt;")
+    .replace(/[>]/g, "&gt;")
+    .replace(/[&]/g, "&amp;")
+    .replace(/["]/g, "&quot;")
+    .replace(/[']/g, "&apos;");
 }

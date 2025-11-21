@@ -1,4 +1,4 @@
-# ESG Data Guide for Miners
+# ESG Calculator Guide for Miners
 
 ## What is ESG and Why Does It Matter?
 
@@ -12,142 +12,92 @@
 
 ---
 
-## Environmental (E) Score - How to Calculate
+## 🚀 NEW: Quick ESG Calculator (During Batch Registration)
 
-**What it measures:** Your mining impact on the environment
+**GOOD NEWS:** You no longer need to measure complex ESG data manually!
 
-### 1. **Water Usage** (liters per ton of ore)
-**How to measure:**
-- Track water intake from mines/processing
-- Document recycled/reused water
-- Record waste water treatment
-- Calculate: Total water used ÷ Total ore processed
+### How It Works:
+1. When you register a batch, you'll see **9 simple multiple-choice questions**
+2. Just select the option that best describes your current practices
+3. LithiTrust instantly calculates your ESG scores
+4. You see your green premium percentage immediately (0-30%)
 
-**Benchmarks:**
-- Excellent (80-100 score): <20,000 L/ton (with 80%+ recycling)
-- Good (60-79 score): 20,000-50,000 L/ton (with 50-80% recycling)
-- Average (40-59 score): 50,000-80,000 L/ton
-- Poor (<40 score): >80,000 L/ton
-
-**Example:** Your mine uses 30,000 liters/ton with 70% recycling = **65-75/100 score**
-
-### 2. **Carbon Intensity** (kg CO2e per ton of ore)
-**How to measure:**
-- Fuel used for mining equipment (diesel, electricity)
-- Calculate: (Fuel consumed × CO2 factor) ÷ Ore produced
-- CO2 factors: 1 liter diesel ≈ 2.7 kg CO2; 1 kWh electricity ≈ 0.5-1 kg CO2
-
-**Benchmarks:**
-- Excellent (80-100): <500 kg CO2e/ton
-- Good (60-79): 500-800 kg CO2e/ton
-- Average (40-59): 800-1200 kg CO2e/ton
-- Poor (<40): >1200 kg CO2e/ton
-
-**Example:** Your mine produces 1000 tons, uses 500 liters diesel (1,350 kg CO2) + 1000 kWh (500 kg CO2) = 1,850 kg CO2 ÷ 1000 tons = 1.85 kg CO2e/ton = **95/100 score**
-
-### 3. **Rehabilitation Plan** (text)
-**What to document:**
-- Post-mining land restoration plans
-- Timeline for rehabilitation
-- Species to be replanted
-- Monitoring methods
-- Budget allocated
-- Community involvement
-
-**Example:** "We will rehabilitate mined areas over 3 years after mining ends. We'll replant 10,000 indigenous acacia trees, restore water sources, and monitor soil quality quarterly. Budget: $50,000."
-
-**Score:** Document existence = +20 points; Detailed/funded plan = +80 points
+### No Measurements Required:
+- ❌ No need to calculate water usage
+- ❌ No need to track carbon emissions
+- ❌ No need to collect benchmark data
+- ✅ Just answer honestly about what you're doing
 
 ---
 
-## Social (S) Score - How to Measure
+## How the Calculator Works
 
-**What it measures:** Your treatment of workers and communities
+### Environmental Questions (3 questions)
+You'll be asked about:
+- Water usage practices (choose from: very little → high)
+- Carbon intensity (choose from: very low → high)
+- Waste management (choose from: recycling → no formal management)
 
-### 1. **Child Labour Check** (Yes/No)
-**What to document:**
-- Workers' age verification system
-- Inspection records
-- Training programs
-- Zero-tolerance policy
+**Your answers automatically calculate your Environmental Score**
 
-**Scoring:**
-- ✅ No child labor detected = +100 points
-- ⚠️ Unclear practices = 0 points
+### Social Questions (3 questions)
+You'll be asked about:
+- Child labor practices (do you ensure no child labor?)
+- Community agreements (written or informal?)
+- Worker safety practices (what equipment/training do you provide?)
 
-**How to verify:**
-- Maintain worker age records
-- Regular site inspections
-- Third-party audits (recommended)
+**Your answers automatically calculate your Social Score**
 
-### 2. **Community Agreement** (Yes/No)
-**What to document:**
-- Written agreement with local communities
-- Community benefit-sharing arrangement
-- Land use consultation
-- Grievance mechanism
-- Community development projects
+### Governance Questions (3 questions)
+You'll be asked about:
+- Mining licenses (are they current and valid?)
+- Record transparency (how documented are your records?)
+- Regulatory compliance (fully compliant or partial?)
 
-**Example agreement includes:**
-- 5% of profits go to community development
-- Local workers hired when possible
-- Monthly community meetings
-- School/health facility construction
-
-**Scoring:**
-- ✅ Formal agreement = +100 points
-- ⚠️ Informal arrangement = 50 points
-- ❌ No agreement = 0 points
-
-### 3. **Safety Practices** (text)
-**What to document:**
-- Worker safety protocols
-- PPE (Personal Protective Equipment) provided
-- Training programs
-- Incident reporting system
-- Health & safety audits
-- Accident rates
-
-**Example:** "All workers receive 8-hour safety training before starting. We provide hard hats, masks, gloves, and boots. Safety committee meets monthly. Zero fatal accidents in last 2 years. Annual third-party safety audit conducted."
-
-**Scoring:** 
-- No documentation = 10 points
-- Basic protocols = 40 points
-- Comprehensive + audited = 80-100 points
+**Your answers automatically calculate your Governance Score**
 
 ---
 
-## Governance (G) Score - How to Measure
+## Understanding Your Score Breakdown
 
-**What it measures:** How well you manage and comply with regulations
+After answering all 9 questions, LithiTrust shows you:
 
-### 1. **Regulatory Compliance** (Yes/No)
-**What to document:**
-- Mining licenses
-- Environmental permits
-- Tax compliance records
-- Export certifications
-- Audit reports
+**Environmental Score (0-100)**
+- Based on your water, carbon, and waste practices
+- Higher = better environmental practices
 
-**Scoring:**
-- ✅ All licenses valid = +100 points
-- ⚠️ Some missing = 50 points
-- ❌ Non-compliant = 0 points
+**Social Score (0-100)**
+- Based on your treatment of workers and communities
+- Higher = better social practices
 
-### 2. **Transparent Reporting** (text)
-**What to document:**
-- Annual ESG reports
-- Community impact assessments
-- Financial transparency
-- Conflict of interest policies
-- Supply chain transparency
+**Governance Score (0-100)**
+- Based on your compliance and transparency
+- Higher = better governance practices
 
-**Example:** "Annual ESG report published online. Community impact assessed quarterly. All financials audited by independent firm. Conflict of interest policy in place for all staff."
+**Overall ESG Score = Average of all three (0-100)**
 
-**Scoring:**
-- No reporting = 10 points
-- Basic annual report = 40 points
-- Comprehensive quarterly reporting = 80-100 points
+### Optional: Add More Details
+After answering the 9 questions, you can optionally add:
+- **Worker Safety Practices**: Describe your safety equipment, training, and incident records
+- **Land Rehabilitation Plan**: Describe how you'll restore mined areas after extraction
+
+These optional details provide additional context but are not required for scoring.
+
+---
+
+## Need Help Understanding Your Score?
+
+**Questions about your ESG results?** Use LithiBot!
+
+### LithiBot AI Assistant:
+- **In-App Chat**: Click "LithiBot" in the sidebar for instant answers
+- **WhatsApp**: Message LithiBot on WhatsApp for guidance anytime
+- Ask questions like:
+  - "How can I improve my environmental score?"
+  - "What does governance score mean?"
+  - "How do I get the 30% green premium?"
+
+LithiBot will explain your scores and suggest improvements in simple language.
 
 ---
 
@@ -182,28 +132,27 @@ Total Price: $14,760 ✅
 
 ---
 
-## How to Gather Data - Step by Step
+## How to Register a Batch - Step by Step
 
-### Month 1-2: Baseline Data Collection
-- [ ] Measure water usage at your operation
-- [ ] Track fuel/electricity consumption
-- [ ] Document all workers and verify ages
-- [ ] Collect safety incident records
-- [ ] Gather all mining permits and licenses
+### Step 1: Enter Batch Details
+- [ ] Mine name and location
+- [ ] Your name and contact
+- [ ] Batch weight (kg)
+- [ ] Lithium content (%)
+- [ ] Ore grade (Spodumene, Petalite, etc.)
 
-### Month 2-3: Create Documentation
-- [ ] Write rehabilitation plan
-- [ ] Document community agreement
-- [ ] Create safety practices manual
-- [ ] Compile governance & compliance records
-- [ ] Get permits notarized if needed
+### Step 2: Answer ESG Questions
+- [ ] Answer 3 Environmental questions
+- [ ] Answer 3 Social questions
+- [ ] Answer 3 Governance questions
+- [ ] View your live ESG score and green premium percentage
 
-### Month 3: Register on LithiTrust
-- [ ] Calculate ESG scores using formulas above
-- [ ] Register batch with all data
-- [ ] Upload supporting documents
-- [ ] View green premium pricing
-- [ ] Receive higher prices from certified buyers
+### Step 3: Add Optional Details (If You Want)
+- [ ] Describe your worker safety practices
+- [ ] Describe your land rehabilitation plan
+- [ ] Submit batch to register
+
+**That's it!** Your batch is now registered with blockchain verification and green premium pricing.
 
 ---
 

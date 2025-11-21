@@ -74,6 +74,10 @@ LithiTrust is a comprehensive blockchain-backed traceability platform designed t
 - Environmental, social, governance compliance data
 - Fields: batchId, environmentalScore, socialScore, governanceScore, childLabourCheck, waterUsage, communityAgreement, safetyPractices, rehabilitationPlan, carbonIntensity
 
+### ESG Documents Table
+- Stores ESG certificates, audit reports, and compliance documentation
+- Fields: batchId, documentType, fileName, filePath, fileSize, uploadedBy, verified, verifiedBy, createdAt
+
 ## API Endpoints
 
 ### Authentication
@@ -96,6 +100,14 @@ LithiTrust is a comprehensive blockchain-backed traceability platform designed t
 - `GET /api/batches/:id/esg` - Get ESG data
 - `POST /api/batches/esg` - Create ESG record
 - `PATCH /api/batches/:id/esg` - Update ESG data
+
+### ESG Documents
+- `GET /api/batches/:id/documents` - Get batch documents
+- `POST /api/batches/:id/documents` - Upload new document
+- `DELETE /api/documents/:id` - Delete document
+
+### Pricing Calculator
+- `GET /api/pricing/calculator?batchId={id}` - Calculate green premium price
 
 ## User Workflows
 
@@ -122,6 +134,56 @@ LithiTrust is a comprehensive blockchain-backed traceability platform designed t
 2. Navigate to "ESG Data" tab
 3. View overall ESG score and individual E/S/G scores
 4. Review detailed compliance information
+
+### Upload ESG Documents
+1. Open batch details
+2. Navigate to "Documents" tab
+3. Select document type (Certificate, Report, Audit, Permit, Other)
+4. Enter file name
+5. Click Upload to attach document to batch
+6. View uploaded documents with verification status (Verified/Pending)
+7. Delete documents using the trash icon if needed
+
+### Calculate Green Premium Price
+1. Navigate to "Pricing Calculator" from sidebar
+2. Select a batch from dropdown
+3. View base price calculation (weight × $12/kg base price)
+4. See green premium percentage based on ESG score (0-30%)
+5. View total selling price including premium amount
+6. Green premium incentivizes higher ESG scores (better scores = higher revenue)
+
+### Test the Blockchain Hash
+1. **Register a Test Batch**
+   - Navigate to "Register Batch"
+   - Fill in all batch details and ESG compliance data
+   - Submit the form
+   - System automatically generates a unique blockchain hash
+
+2. **View the Blockchain Hash**
+   - Go to "All Batches"
+   - Click any batch to open detail modal
+   - Click "Overview" tab
+   - Scroll to "Blockchain Verification" section
+   - View the blockchain hash (format: `0x` followed by 64 hex characters)
+
+3. **Verify Immutability**
+   - Close and reopen the same batch modal multiple times
+   - Blockchain hash remains **exactly the same** (proves immutability)
+   - Register another batch and compare hashes - each is unique
+   - This demonstrates that batch data cannot be tampered with
+
+4. **QR Code Contains Hash**
+   - In batch detail modal, click "QR Code" tab
+   - QR code encodes the batch ID
+   - When scanned, it would verify the batch against its blockchain hash
+   - Download QR code for physical verification
+
+5. **How the Blockchain Works**
+   - Each batch receives a cryptographically generated 32-byte hash on creation
+   - Hash is stored permanently in the database
+   - Acts as digital fingerprint proving batch authenticity
+   - Current implementation uses simulated blockchain (local hashing)
+   - Phase 2 can integrate real blockchain (Polygon/Base Layer 2)
 
 ## Development
 

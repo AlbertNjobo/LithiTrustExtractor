@@ -3,6 +3,7 @@ import {
   batches,
   supplyChainEvents,
   esgRecords,
+  esgDocuments,
   type User,
   type UpsertUser,
   type Batch,
@@ -11,6 +12,8 @@ import {
   type InsertSupplyChainEvent,
   type EsgRecord,
   type InsertEsgRecord,
+  type EsgDocument,
+  type InsertEsgDocument,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
@@ -36,6 +39,11 @@ export interface IStorage {
   createEsgRecord(record: InsertEsgRecord): Promise<EsgRecord>;
   getEsgRecord(batchId: string): Promise<EsgRecord | undefined>;
   updateEsgRecord(batchId: string, data: Partial<EsgRecord>): Promise<EsgRecord | undefined>;
+
+  // ESG document operations
+  uploadEsgDocument(doc: InsertEsgDocument): Promise<EsgDocument>;
+  getBatchDocuments(batchId: string): Promise<EsgDocument[]>;
+  deleteDocument(docId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {

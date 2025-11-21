@@ -121,6 +121,28 @@ export const insertEsgRecordSchema = createInsertSchema(esgRecords).omit({
 export type InsertEsgRecord = z.infer<typeof insertEsgRecordSchema>;
 export type EsgRecord = typeof esgRecords.$inferSelect;
 
+// ESG Documents table (for certificates and compliance reports)
+export const esgDocuments = pgTable("esg_documents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  batchId: varchar("batch_id").notNull().references(() => batches.id, { onDelete: 'cascade' }),
+  documentType: varchar("document_type").notNull(), // certificate, report, audit, permit
+  fileName: varchar("file_name").notNull(),
+  filePath: text("file_path").notNull(), // stored file path
+  fileSize: integer("file_size"), // bytes
+  uploadedBy: varchar("uploaded_by").notNull().references(() => users.id),
+  verified: boolean("verified").default(false),
+  verifiedBy: varchar("verified_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertEsgDocumentSchema = createInsertSchema(esgDocuments).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertEsgDocument = z.infer<typeof insertEsgDocumentSchema>;
+export type EsgDocument = typeof esgDocuments.$inferSelect;
+
 // Relations
 export const batchesRelations = relations(batches, ({ one, many }) => ({
   creator: one(users, {
@@ -132,6 +154,7 @@ export const batchesRelations = relations(batches, ({ one, many }) => ({
     fields: [batches.id],
     references: [esgRecords.batchId],
   }),
+  esgDocuments: many(esgDocuments),
 }));
 
 export const supplyChainEventsRelations = relations(supplyChainEvents, ({ one }) => ({
@@ -149,5 +172,16 @@ export const esgRecordsRelations = relations(esgRecords, ({ one }) => ({
   batch: one(batches, {
     fields: [esgRecords.batchId],
     references: [batches.id],
+  }),
+}));
+
+export const esgDocumentsRelations = relations(esgDocuments, ({ one }) => ({
+  batch: one(batches, {
+    fields: [esgDocuments.batchId],
+    references: [batches.id],
+  }),
+  uploader: one(users, {
+    fields: [esgDocuments.uploadedBy],
+    references: [users.id],
   }),
 }));

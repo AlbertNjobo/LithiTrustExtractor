@@ -2,14 +2,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { QrCode as QrCodeIcon, Download, MapPin, Package, Calendar, User, TrendingUp } from "lucide-react";
+import { QrCode as QrCodeIcon, Download, MapPin, Package, Calendar, User, TrendingUp, FileText, Trash2, CheckCircle2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { Batch, SupplyChainEvent, EsgRecord } from "@shared/schema";
+import type { Batch, SupplyChainEvent, EsgRecord, EsgDocument } from "@shared/schema";
 import { format } from "date-fns";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import QRCode from "react-qr-code";
 import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useState } from "react";
 
 interface BatchDetailModalProps {
   batch: Batch | null;
@@ -18,6 +23,10 @@ interface BatchDetailModalProps {
 }
 
 export function BatchDetailModal({ batch, open, onOpenChange }: BatchDetailModalProps) {
+  const { toast } = useToast();
+  const [documentType, setDocumentType] = useState<string>("certificate");
+  const [fileName, setFileName] = useState<string>("");
+
   const { data: events, isLoading: eventsLoading } = useQuery<SupplyChainEvent[]>({
     queryKey: ["/api/batches", batch?.id, "events"],
     enabled: !!batch?.id && open,
@@ -26,6 +35,59 @@ export function BatchDetailModal({ batch, open, onOpenChange }: BatchDetailModal
   const { data: esg, isLoading: esgLoading } = useQuery<EsgRecord>({
     queryKey: ["/api/batches", batch?.id, "esg"],
     enabled: !!batch?.id && open,
+  });
+
+  const { data: documents, isLoading: documentsLoading } = useQuery<EsgDocument[]>({
+    queryKey: ["/api/batches", batch?.id, "documents"],
+    enabled: !!batch?.id && open,
+  });
+
+  const uploadMutation = useMutation({
+    mutationFn: async (data: { documentType: string; fileName: string }) => {
+      const response = await apiRequest("POST", `/api/batches/${batch?.id}/documents`, {
+        documentType: data.documentType,
+        fileName: data.fileName,
+        filePath: `/documents/${batch?.id}/${data.fileName}`,
+        fileSize: 0,
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/batches", batch?.id, "documents"] });
+      toast({
+        title: "Success",
+        description: "Document uploaded successfully",
+      });
+      setFileName("");
+      setDocumentType("certificate");
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to upload document",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (docId: string) => {
+      await apiRequest("DELETE", `/api/documents/${docId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/batches", batch?.id, "documents"] });
+      toast({
+        title: "Success",
+        description: "Document deleted successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete document",
+        variant: "destructive",
+      });
+    },
   });
 
   if (!batch) return null;
@@ -74,10 +136,11 @@ export function BatchDetailModal({ batch, open, onOpenChange }: BatchDetailModal
         </DialogHeader>
 
         <Tabs defaultValue="overview" className="mt-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
             <TabsTrigger value="history" data-testid="tab-history">History</TabsTrigger>
             <TabsTrigger value="esg" data-testid="tab-esg">ESG Data</TabsTrigger>
+            <TabsTrigger value="documents" data-testid="tab-documents">Documents</TabsTrigger>
             <TabsTrigger value="qr" data-testid="tab-qr">QR Code</TabsTrigger>
           </TabsList>
 
@@ -321,6 +384,119 @@ export function BatchDetailModal({ batch, open, onOpenChange }: BatchDetailModal
                 No ESG data recorded yet
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="documents" className="space-y-6 mt-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">ESG Compliance Documents</h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                Upload and manage ESG certificates, audit reports, and compliance documentation
+              </p>
+            </div>
+
+            {/* Upload Form */}
+            <div className="p-4 rounded-md border border-border bg-muted/50 space-y-4">
+              <h4 className="font-semibold text-sm">Upload New Document</h4>
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Document Type</label>
+                  <Select value={documentType} onValueChange={setDocumentType}>
+                    <SelectTrigger data-testid="select-document-type">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="certificate">Certificate</SelectItem>
+                      <SelectItem value="report">ESG Report</SelectItem>
+                      <SelectItem value="audit">Audit Report</SelectItem>
+                      <SelectItem value="permit">Permit</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="md:col-span-2 flex gap-2">
+                  <div className="flex-1">
+                    <label className="text-sm font-medium mb-2 block">File Name</label>
+                    <Input
+                      placeholder="e.g., ESG-Certificate-2024.pdf"
+                      value={fileName}
+                      onChange={(e) => setFileName(e.target.value)}
+                      data-testid="input-document-name"
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <Button
+                      onClick={() => uploadMutation.mutate({ documentType, fileName })}
+                      disabled={!fileName.trim() || uploadMutation.isPending}
+                      data-testid="button-upload-document"
+                    >
+                      {uploadMutation.isPending ? "Uploading..." : "Upload"}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Documents List */}
+            <div className="space-y-3">
+              <h4 className="font-semibold text-sm">Uploaded Documents</h4>
+              {documentsLoading ? (
+                <div className="space-y-2">
+                  {[1, 2].map((i) => (
+                    <Skeleton key={i} className="h-16 w-full" />
+                  ))}
+                </div>
+              ) : documents && documents.length > 0 ? (
+                <div className="space-y-2">
+                  {documents.map((doc) => (
+                    <div key={doc.id} className="flex items-center justify-between p-4 rounded-md border border-border hover:bg-muted/50 transition-colors">
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        <FileText className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-sm truncate" data-testid={`text-document-${doc.id}`}>
+                            {doc.fileName}
+                          </p>
+                          <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground flex-wrap">
+                            <Badge variant="outline" className="capitalize">
+                              {doc.documentType}
+                            </Badge>
+                            {doc.verified ? (
+                              <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                                <CheckCircle2 className="w-3 h-3" />
+                                Verified
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                                <Clock className="w-3 h-3" />
+                                Pending
+                              </div>
+                            )}
+                            {doc.createdAt && (
+                              <span>{format(new Date(doc.createdAt), "MMM d, yyyy")}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => deleteMutation.mutate(doc.id)}
+                        disabled={deleteMutation.isPending}
+                        className="flex-shrink-0 ml-2"
+                        data-testid={`button-delete-document-${doc.id}`}
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p>No documents uploaded yet</p>
+                  <p className="text-xs mt-1">Upload certificates and compliance reports above</p>
+                </div>
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="qr" className="mt-6">

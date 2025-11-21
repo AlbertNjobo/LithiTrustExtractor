@@ -1,337 +1,43 @@
 # LithiTrust - Blockchain Traceability Platform for Zimbabwe's Lithium Supply Chain
 
-## Project Overview
-
-LithiTrust is a comprehensive blockchain-backed traceability platform designed to transform Zimbabwe's lithium value chain. The platform enables transparent tracking of lithium ore from mine to manufacturer, with integrated ESG (Environmental, Social, Governance) certification and QR code verification for international buyers.
-
-## Key Features
-
-### 1. Blockchain-Backed Traceability
-- Every lithium batch receives a unique digital "birth certificate" with blockchain hash
-- Immutable records track material through the entire supply chain
-- Complete chain of custody from mine → processor → exporter → manufacturer
-
-### 2. ESG Compliance Tracking
-- Environmental, Social, and Governance scores (0-100 scale)
-- Child labour checks and community agreement verification
-- Water usage, carbon intensity, and safety practices documentation
-- Rehabilitation plan tracking
-
-### 3. QR Code Verification
-- Unique QR codes generated for each batch
-- International buyers can scan to verify authenticity and origin
-- Complete traceability data accessible via QR code
-- Downloadable certificates for regulatory compliance
-
-### 4. Role-Based Access
-- **Miners**: Register batches, track production, view ESG data
-- **Processors**: Update batch stages, add processing events
-- **Exporters**: Manage export logistics and compliance
-- **Buyers**: Verify authenticity, view ESG scores, access certificates
-- **Regulators**: Oversight dashboard with comprehensive reporting
-
-## Tech Stack
-
-### Frontend
-- **React 18** with TypeScript
-- **Wouter** for client-side routing
-- **Tailwind CSS** with Shadcn UI components
-- **React Query** for data fetching and state management
-- **React Hook Form** with Zod validation
-- **QR Code generation** with react-qr-code
-- **Date formatting** with date-fns
-- **Responsive design** with mobile-first approach
-
-### Backend
-- **Express.js** server with TypeScript
-- **PostgreSQL** database (Neon-backed)
-- **Drizzle ORM** for type-safe database operations
-- **Replit Auth** (OpenID Connect) for authentication
-- **Session-based authentication** with secure cookies
-- **Zod** for runtime validation
-
-### Design System
-- **Typography**: Inter (body), Space Grotesk (headings), JetBrains Mono (technical data)
-- **Color Scheme**: Green sustainability theme (Primary: HSL 142 76% 36%)
-- **Components**: Professional, enterprise-grade UI with consistent spacing
-- **Dark Mode**: Full support with automatic theme switching
-
-## Database Schema
-
-### Users Table
-- Stores user profiles with role-based access
-- Fields: id, email, firstName, lastName, profileImageUrl, role, organization
-
-### Batches Table
-- Core lithium batch records
-- Fields: batchNumber, mineName, mineLocation, minerName, weight, grade, lithiumContent, currentStage, status, blockchainHash, qrCode
-
-### Supply Chain Events Table
-- Tracks batch movement through supply chain
-- Fields: batchId, stage, stakeholder, location, timestamp, notes, verifiedBy
-
-### ESG Records Table
-- Environmental, social, governance compliance data
-- Fields: batchId, environmentalScore, socialScore, governanceScore, childLabourCheck, waterUsage, communityAgreement, safetyPractices, rehabilitationPlan, carbonIntensity
-
-### ESG Documents Table
-- Stores ESG certificates, audit reports, and compliance documentation
-- Fields: batchId, documentType, fileName, filePath, fileSize, uploadedBy, verified, verifiedBy, createdAt
-
-## API Endpoints
-
-### Authentication
-- `GET /api/auth/user` - Get current authenticated user
-- `GET /api/login` - Initiate OAuth login flow
-- `GET /api/logout` - Log out and clear session
-- `GET /api/callback` - OAuth callback handler
-
-### Batches
-- `GET /api/batches` - List all batches
-- `GET /api/batches/:id` - Get batch details
-- `POST /api/batches` - Create new batch
-- `PATCH /api/batches/:id` - Update batch
-
-### Supply Chain Events
-- `GET /api/batches/:id/events` - Get batch event history
-- `POST /api/batches/:id/events` - Add new event
-
-### ESG Records
-- `GET /api/batches/:id/esg` - Get ESG data
-- `POST /api/batches/esg` - Create ESG record
-- `PATCH /api/batches/:id/esg` - Update ESG data
-
-### ESG Documents
-- `GET /api/batches/:id/documents` - Get batch documents
-- `POST /api/batches/:id/documents` - Upload new document
-- `DELETE /api/documents/:id` - Delete document
-
-### Pricing Calculator
-- `GET /api/pricing/calculator?batchId={id}` - Calculate green premium price
-
-## User Workflows
-
-### Register a Batch
-1. Navigate to "Register Batch" page
-2. **Step 1**: Enter batch details (mine name, location, miner info, weight, grade, lithium content)
-3. **Step 2**: Record ESG compliance data (scores, water usage, carbon intensity, safety practices)
-4. Submit to create batch with blockchain hash and initial supply chain event
-
-### Track Supply Chain
-1. View dashboard with batch statistics
-2. Filter batches by stage (mining, processing, export, delivered)
-3. Click batch to view detailed timeline
-4. See complete chain of custody with stakeholder information
-
-### Generate QR Code
-1. Open batch details
-2. Navigate to "QR Code" tab
-3. View generated QR code (256x256px)
-4. Download QR code for printing/sharing
-
-### View ESG Compliance
-1. Open batch details
-2. Navigate to "ESG Data" tab
-3. View overall ESG score and individual E/S/G scores
-4. Review detailed compliance information
-
-### Upload ESG Documents
-1. Open batch details
-2. Navigate to "Documents" tab
-3. Select document type (Certificate, Report, Audit, Permit, Other)
-4. Enter file name
-5. Click Upload to attach document to batch
-6. View uploaded documents with verification status (Verified/Pending)
-7. Delete documents using the trash icon if needed
-
-### Calculate Green Premium Price
-1. Navigate to "Pricing Calculator" from sidebar
-2. Select a batch from dropdown
-3. View base price calculation (weight × $12/kg base price)
-4. See green premium percentage based on ESG score (0-30%)
-5. View total selling price including premium amount
-6. Green premium incentivizes higher ESG scores (better scores = higher revenue)
-
-### Test the Blockchain Hash
-1. **Register a Test Batch**
-   - Navigate to "Register Batch"
-   - Fill in all batch details and ESG compliance data
-   - Submit the form
-   - System automatically generates a unique blockchain hash
-
-2. **View the Blockchain Hash**
-   - Go to "All Batches"
-   - Click any batch to open detail modal
-   - Click "Overview" tab
-   - Scroll to "Blockchain Verification" section
-   - View the blockchain hash (format: `0x` followed by 64 hex characters)
-
-3. **Verify Immutability**
-   - Close and reopen the same batch modal multiple times
-   - Blockchain hash remains **exactly the same** (proves immutability)
-   - Register another batch and compare hashes - each is unique
-   - This demonstrates that batch data cannot be tampered with
-
-4. **QR Code Contains Hash**
-   - In batch detail modal, click "QR Code" tab
-   - QR code encodes the batch ID
-   - When scanned, it would verify the batch against its blockchain hash
-   - Download QR code for physical verification
-
-5. **How the Blockchain Works**
-   - Each batch receives a cryptographically generated 32-byte hash on creation
-   - Hash is stored permanently in the database
-   - Acts as digital fingerprint proving batch authenticity
-   - Current implementation uses simulated blockchain (local hashing)
-   - Phase 2 can integrate real blockchain (Polygon/Base Layer 2)
-
-## Development
-
-### Running Locally
-The workflow "Start application" runs:
-```bash
-npm run dev
-```
-
-This starts:
-- Express server on port 5000
-- Vite dev server with HMR
-- PostgreSQL database connection
-
-### Database Migrations
-To push schema changes:
-```bash
-npm run db:push
-```
-
-### Environment Variables
-
-### Required Secrets (Automatically Managed)
-- `DATABASE_URL` - PostgreSQL connection string
-- `SESSION_SECRET` - Session encryption key
-- `REPL_ID` - Replit OAuth client ID
-- `ISSUER_URL` - OAuth issuer URL
-
-### WhatsApp Integration (Configured ✓)
-- `TWILIO_ACCOUNT_SID` - Twilio account identifier
-- `TWILIO_AUTH_TOKEN` - Twilio authentication token
-- `TWILIO_WHATSAPP_NUMBER` - WhatsApp sandbox or business number
-
-**See WHATSAPP_SETUP.md and WHATSAPP_TESTING.md for detailed configuration**
-
-### Optional Blockchain Variables (For Full Blockchain Functionality)
-- `POLYGON_RPC_URL` - Polygon RPC endpoint (default: public Mumbai RPC)
-- `BLOCKCHAIN_PRIVATE_KEY` - Wallet private key for signing transactions
-- `BLOCKCHAIN_CONTRACT_ADDRESS` - Smart contract address (Phase 3)
-
-**See BLOCKCHAIN_SETUP.md for detailed configuration instructions**
-
-## Design Principles
-
-1. **Transparency First**: Every data point is verifiable and traceable
-2. **Professional Credibility**: Enterprise-grade polish for international buyers
-3. **Accessibility**: Works for artisanal miners with basic smartphones AND corporate buyers
-4. **Data Density Balance**: Dense information for regulators, spacious flows for miners
-5. **Sustainability Visual Language**: Green accents represent eco-friendly practices
-
-## Blockchain Integration (Phase 2 - IMPLEMENTED)
-
-### Real Blockchain Support
-LithiTrust now integrates with **Polygon Mumbai Testnet** (Layer 2) for blockchain storage:
-
-- **Network**: Polygon Mumbai Testnet (chainId: 80001)
-- **Hash Storage**: Each batch hash is cryptographically stored on-chain
-- **Verification**: Full blockchain verification of batch authenticity
-- **Production Ready**: Easy upgrade to Polygon Mainnet
-
-### How Blockchain Integration Works
-1. When a batch is registered, the hash is automatically sent to blockchain
-2. The blockchain stores an immutable record of the batch
-3. Each batch gets a blockchain-verified hash that cannot be tampered with
-4. Buyers can verify batches directly on the blockchain
-
-### API Endpoints for Blockchain
-- `GET /api/blockchain/verify/:batchId` - Verify batch authenticity on blockchain
-- `GET /api/blockchain/network` - Get current blockchain network information
-
-### Testing Blockchain Integration
-1. Register a batch normally
-2. The system automatically stores the hash on Polygon
-3. Use the Batch Details modal to view blockchain hash
-4. The hash is prefixed with "LITHITRUST:" indicating blockchain verification
-5. Each batch can be verified independently on the blockchain
-
-### WhatsApp Integration (IMPLEMENTED ✓)
-
-LithiBot is now available on WhatsApp for small-scale miners to:
-- Get instant regulatory guidance without login
-- Calculate green premium pricing for their batches
-- Understand ESG compliance requirements
-- Learn about blockchain verification
-- Access step-by-step guidance in simple language
-- Works on basic phones with WhatsApp installed
-
-**WebHook Endpoint:** `POST/GET /api/whatsapp/webhook`
-**Session Management:** 30-minute conversation sessions per phone number
-**Features:** Multi-turn conversations with context, character limit handling, auto-cleanup
-
-See WHATSAPP_SETUP.md and WHATSAPP_TESTING.md for configuration and testing.
-
-## Future Enhancements
-
-### Phase 3 (Not in MVP)
-- Smart contracts for automated royalty payments
-- Mobile app with offline support
-- Multi-language support (Shona, Ndebele, English)
-- Real-time lithium pricing feeds
-- SMS support for feature phones (SMS fallback)
-
-## Project Structure
-
-```
-├── client/                  # React frontend
-│   ├── src/
-│   │   ├── components/      # Reusable UI components
-│   │   │   ├── ui/         # Shadcn UI primitives
-│   │   │   ├── app-sidebar.tsx
-│   │   │   ├── batch-card.tsx
-│   │   │   ├── batch-detail-modal.tsx
-│   │   │   └── theme-toggle.tsx
-│   │   ├── hooks/          # Custom React hooks
-│   │   │   ├── useAuth.ts
-│   │   │   └── use-toast.ts
-│   │   ├── lib/            # Utility functions
-│   │   │   ├── queryClient.ts
-│   │   │   ├── authUtils.ts
-│   │   │   └── utils.ts
-│   │   ├── pages/          # Page components
-│   │   │   ├── landing.tsx
-│   │   │   ├── home.tsx
-│   │   │   ├── batches.tsx
-│   │   │   ├── register.tsx
-│   │   │   ├── reports.tsx
-│   │   │   └── settings.tsx
-│   │   ├── App.tsx         # Main app component
-│   │   ├── index.css       # Global styles
-│   │   └── main.tsx        # Entry point
-├── server/                 # Express backend
-│   ├── db.ts              # Database connection
-│   ├── storage.ts         # Data access layer
-│   ├── routes.ts          # API routes
-│   ├── replitAuth.ts      # Authentication setup
-│   └── app.ts             # Express app configuration
-├── shared/                # Shared code
-│   └── schema.ts          # Database schema & types
-├── design_guidelines.md   # UI/UX design specifications
-└── replit.md             # This file
-```
-
-## Credits
-
-**Team**: Task Force 404
-**Hackathon**: Lithium Value Chain Hackathon 2025
-**Date**: November 21, 2025
-
-## License
-
-Built for the Lithium Value Chain Hackathon 2025 to empower Zimbabwe's lithium industry through transparency, inclusion, and digital transformation.
+## Overview
+LithiTrust is a blockchain-backed traceability platform designed to bring transparency to Zimbabwe's lithium value chain, from mine to manufacturer. Its core purpose is to enable immutable tracking of lithium ore, integrate ESG (Environmental, Social, Governance) certification, and provide QR code verification for international buyers. The project aims to empower artisanal miners, ensure ethical sourcing, and unlock "green premium" pricing for compliant lithium, fostering sustainable economic growth and establishing Zimbabwe as a leader in responsible mineral supply.
+
+## User Preferences
+I prefer iterative development, so please ask before making major changes. I like detailed explanations and expect the agent to work by providing options for me to choose from when there are multiple ways to implement a feature. I also prefer simple language in explanations and documentation.
+
+## System Architecture
+
+### UI/UX Decisions
+- **Typography**: Inter (body), Space Grotesk (headings), JetBrains Mono (technical data).
+- **Color Scheme**: Green sustainability theme (Primary: HSL 142 76% 36%).
+- **Components**: Professional, enterprise-grade UI with consistent spacing, utilizing Shadcn UI.
+- **Dark Mode**: Full support with automatic theme switching.
+- **Accessibility**: Designed for both artisanal miners with basic smartphones and corporate buyers, balancing data density for regulators with spacious flows for miners.
+- **Sustainability Visual Language**: Green accents to represent eco-friendly practices.
+
+### Technical Implementations
+- **Frontend**: React 18 with TypeScript, Wouter for routing, Tailwind CSS, React Query for data fetching, React Hook Form with Zod, react-qr-code for QR generation, date-fns.
+- **Backend**: Express.js with TypeScript, PostgreSQL (Neon-backed), Drizzle ORM, Replit Auth (OpenID Connect) for session-based authentication, Zod for validation.
+- **Blockchain Integration**: Utilizes Polygon Mumbai Testnet (Layer 2) for storing immutable batch hashes on-chain, with an easy upgrade path to Polygon Mainnet. Each batch receives a cryptographically generated 32-byte hash stored permanently on the blockchain.
+- **AI Chatbot**: LithiBot, powered by Gemini AI, provides context-aware responses via web interface and WhatsApp, answering questions on ESG scoring, green premium, blockchain, and registration.
+
+### Feature Specifications
+- **Blockchain-Backed Traceability**: Unique digital "birth certificates" and immutable records for each lithium batch, tracking its journey from mine to manufacturer.
+- **Guided ESG Score Calculator**: An integrated, simple 9-question multiple-choice questionnaire for instant ESG score calculation and live "Green Premium" display (0-30% price increase) for miners.
+- **ESG Compliance Tracking**: Detailed E, S, G scores (0-100), child labor checks, community agreement verification, water usage, carbon intensity, safety practices, and document upload for verification.
+- **QR Code Verification**: Unique QR codes for each batch allowing international buyers to verify authenticity, origin, and access traceability data.
+- **LithiBot AI Chatbot**: Web and WhatsApp access for miners to get guidance on ESG, green premium, blockchain, and registration.
+- **Role-Based Access**: Granular permissions for Miners, Processors, Exporters, Buyers, and Regulators.
+
+### System Design Choices
+- **Transparency First**: All data points are verifiable and traceable.
+- **Professional Credibility**: Enterprise-grade polish for international buyers.
+- **Development Workflow**: Uses `npm run dev` for local development, `npm run db:push` for database migrations.
+
+## External Dependencies
+- **PostgreSQL**: Database solution, specifically Neon-backed.
+- **Replit Auth**: OpenID Connect for user authentication.
+- **Twilio**: For WhatsApp integration (LithiBot).
+- **Gemini AI**: Powers the LithiBot chatbot for context-aware responses.
+- **Polygon Mumbai Testnet**: Layer 2 blockchain for immutable storage of batch hashes.

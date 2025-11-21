@@ -330,114 +330,143 @@ export default function Register() {
               </div>
               <div>
                 <CardTitle>ESG Compliance</CardTitle>
-                <CardDescription>Record environmental, social, and governance data</CardDescription>
+                <CardDescription>Record environmental, social, and governance data. Your scores directly determine your green premium pricing (0-30% price increase). Need help? See ESG_GUIDE.md</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <Form {...esgForm}>
-              <form onSubmit={esgForm.handleSubmit(onEsgSubmit)} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <FormField
-                    control={esgForm.control}
-                    name="environmentalScore"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Environmental Score (0-100)</FormLabel>
-                        <FormControl>
-                          <Input type="number" min="0" max="100" {...field} onChange={e => field.onChange(parseInt(e.target.value))} data-testid="input-environmental-score" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              <form onSubmit={esgForm.handleSubmit(onEsgSubmit)} className="space-y-8">
+                {/* ESG Scores Section */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-primary" />
+                    ESG Scores (Calculate using ESG_GUIDE.md)
+                  </h3>
+                  <div className="bg-secondary/50 p-4 rounded-md mb-4">
+                    <p className="text-sm text-muted-foreground">
+                      💡 <strong>How to calculate:</strong> Each score measures your practices. Environmental = water usage + carbon footprint. Social = child labor + community agreements. Governance = compliance + transparency. Your overall score = (E+S+G)÷3
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField
+                      control={esgForm.control}
+                      name="environmentalScore"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Environmental Score (0-100)</FormLabel>
+                          <FormControl>
+                            <Input type="number" min="0" max="100" {...field} onChange={e => field.onChange(parseInt(e.target.value))} placeholder="0" data-testid="input-environmental-score" />
+                          </FormControl>
+                          <p className="text-xs text-muted-foreground mt-1">Water usage, carbon emissions, rehabilitation</p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={esgForm.control}
-                    name="socialScore"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Social Score (0-100)</FormLabel>
-                        <FormControl>
-                          <Input type="number" min="0" max="100" {...field} onChange={e => field.onChange(parseInt(e.target.value))} data-testid="input-social-score" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={esgForm.control}
+                      name="socialScore"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Social Score (0-100)</FormLabel>
+                          <FormControl>
+                            <Input type="number" min="0" max="100" {...field} onChange={e => field.onChange(parseInt(e.target.value))} placeholder="0" data-testid="input-social-score" />
+                          </FormControl>
+                          <p className="text-xs text-muted-foreground mt-1">No child labor, community agreements, worker safety</p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={esgForm.control}
-                    name="governanceScore"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Governance Score (0-100)</FormLabel>
-                        <FormControl>
-                          <Input type="number" min="0" max="100" {...field} onChange={e => field.onChange(parseInt(e.target.value))} data-testid="input-governance-score" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={esgForm.control}
+                      name="governanceScore"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Governance Score (0-100)</FormLabel>
+                          <FormControl>
+                            <Input type="number" min="0" max="100" {...field} onChange={e => field.onChange(parseInt(e.target.value))} placeholder="0" data-testid="input-governance-score" />
+                          </FormControl>
+                          <p className="text-xs text-muted-foreground mt-1">Licenses, compliance, transparency, audit records</p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={esgForm.control}
-                    name="waterUsage"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Water Usage (liters, optional)</FormLabel>
-                        <FormControl>
-                          <Input type="number" step="0.01" placeholder="0.00" {...field} data-testid="input-water-usage" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                {/* Detailed Environmental Data */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Environmental Details (Optional)</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={esgForm.control}
+                      name="waterUsage"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Water Usage (liters per ton of ore)</FormLabel>
+                          <FormControl>
+                            <Input type="number" step="0.01" placeholder="30000" {...field} data-testid="input-water-usage" />
+                          </FormControl>
+                          <p className="text-xs text-muted-foreground mt-1">Example: 30,000 = good recycling practices</p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={esgForm.control}
-                    name="carbonIntensity"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Carbon Intensity (kg CO₂e/ton, optional)</FormLabel>
-                        <FormControl>
-                          <Input type="number" step="0.01" placeholder="0.00" {...field} data-testid="input-carbon-intensity" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={esgForm.control}
+                      name="carbonIntensity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Carbon Intensity (kg CO₂e per ton)</FormLabel>
+                          <FormControl>
+                            <Input type="number" step="0.01" placeholder="600" {...field} data-testid="input-carbon-intensity" />
+                          </FormControl>
+                          <p className="text-xs text-muted-foreground mt-1">Example: 600 = efficient equipment + some renewable energy</p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
 
-                <FormField
-                  control={esgForm.control}
-                  name="safetyPractices"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Safety Practices (Optional)</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Describe safety measures implemented..." {...field} data-testid="textarea-safety-practices" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Safety & Plans */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Social & Safety Practices</h3>
+                  <div className="space-y-4">
+                    <FormField
+                      control={esgForm.control}
+                      name="safetyPractices"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Worker Safety Practices (Optional)</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="Example: All workers receive 8-hour safety training. We provide hard hats, masks, gloves, boots. Safety committee meets monthly. Zero accidents in last year..." {...field} data-testid="textarea-safety-practices" />
+                          </FormControl>
+                          <p className="text-xs text-muted-foreground mt-1">Describe your worker protection measures and safety records</p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <FormField
-                  control={esgForm.control}
-                  name="rehabilitationPlan"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Rehabilitation Plan (Optional)</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Describe environmental rehabilitation plan..." {...field} data-testid="textarea-rehabilitation-plan" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <FormField
+                      control={esgForm.control}
+                      name="rehabilitationPlan"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Land Rehabilitation Plan (Optional)</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="Example: After mining ends, we will rehabilitate areas over 3 years. Plant 10,000 indigenous trees. Restore water sources. Monthly monitoring. Budget: $50,000..." {...field} data-testid="textarea-rehabilitation-plan" />
+                          </FormControl>
+                          <p className="text-xs text-muted-foreground mt-1">Describe your plan to restore mined areas after extraction</p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
 
                 <div className="flex justify-between">
                   <Button type="button" variant="outline" onClick={() => setStep(1)} data-testid="button-back">

@@ -13,6 +13,7 @@ import Batches from "@/pages/batches";
 import Register from "@/pages/register";
 import Reports from "@/pages/reports";
 import Pricing from "@/pages/pricing";
+import ESGCalculator from "@/pages/esg-calculator";
 import Settings from "@/pages/settings";
 import Chatbot from "@/pages/chatbot";
 import NotFound from "@/pages/not-found";
@@ -27,6 +28,7 @@ function Router({ isAuthenticated }: { isAuthenticated: boolean }) {
           <Route path="/" component={Home} />
           <Route path="/batches" component={Batches} />
           <Route path="/register" component={Register} />
+          <Route path="/esg-calculator" component={ESGCalculator} />
           <Route path="/pricing" component={Pricing} />
           <Route path="/reports" component={Reports} />
           <Route path="/chatbot" component={Chatbot} />

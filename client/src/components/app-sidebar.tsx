@@ -1,4 +1,4 @@
-import { Home, Package, Plus, FileText, DollarSign, MessageCircle, Settings, LogOut } from "lucide-react";
+import { Home, Package, Plus, Leaf, DollarSign, MessageCircle, Settings, LogOut, FileText } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -30,6 +30,11 @@ const menuItems = [
     title: "Register Batch",
     url: "/register",
     icon: Plus,
+  },
+  {
+    title: "ESG Calculator",
+    url: "/esg-calculator",
+    icon: Leaf,
   },
   {
     title: "Pricing Calculator",

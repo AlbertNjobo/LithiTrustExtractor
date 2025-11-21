@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { blockchain } from "./blockchain";
 import { insertBatchSchema, insertEsgRecordSchema, insertEsgDocumentSchema } from "@shared/schema";
 import { z } from "zod";
 
@@ -240,6 +241,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error calculating pricing:", error);
       res.status(500).json({ message: "Failed to calculate pricing" });
+    }
+  });
+
+  // Blockchain verification endpoint
+  app.get("/api/blockchain/verify/:batchId", isAuthenticated, async (req: any, res) => {
+    try {
+      const batchId = req.params.batchId as string;
+      const batch = await storage.getBatch(batchId);
+      
+      if (!batch) {
+        return res.status(404).json({ message: "Batch not found" });
+      }
+
+      const verification = await blockchain.verifyBatchHash(batchId, batch.blockchainHash);
+      
+      res.json({
+        batchId,
+        batchNumber: batch.batchNumber,
+        blockchainHash: batch.blockchainHash,
+        ...verification,
+      });
+    } catch (error) {
+      console.error("Error verifying blockchain:", error);
+      res.status(500).json({ message: "Failed to verify batch on blockchain" });
+    }
+  });
+
+  // Blockchain network info endpoint
+  app.get("/api/blockchain/network", isAuthenticated, async (req: any, res) => {
+    try {
+      const networkInfo = await blockchain.getNetworkInfo();
+      res.json(networkInfo);
+    } catch (error) {
+      console.error("Error getting blockchain network info:", error);
+      res.status(500).json({ message: "Failed to get blockchain network info" });
     }
   });
 

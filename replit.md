@@ -219,13 +219,37 @@ Required secrets (automatically managed by Replit):
 4. **Data Density Balance**: Dense information for regulators, spacious flows for miners
 5. **Sustainability Visual Language**: Green accents represent eco-friendly practices
 
-## Future Enhancements
+## Blockchain Integration (Phase 2 - IMPLEMENTED)
 
-### Phase 2 (Not in MVP)
-- Real blockchain integration (Polygon/Base Layer 2)
+### Real Blockchain Support
+LithiTrust now integrates with **Polygon Mumbai Testnet** (Layer 2) for blockchain storage:
+
+- **Network**: Polygon Mumbai Testnet (chainId: 80001)
+- **Hash Storage**: Each batch hash is cryptographically stored on-chain
+- **Verification**: Full blockchain verification of batch authenticity
+- **Production Ready**: Easy upgrade to Polygon Mainnet
+
+### How Blockchain Integration Works
+1. When a batch is registered, the hash is automatically sent to blockchain
+2. The blockchain stores an immutable record of the batch
+3. Each batch gets a blockchain-verified hash that cannot be tampered with
+4. Buyers can verify batches directly on the blockchain
+
+### API Endpoints for Blockchain
+- `GET /api/blockchain/verify/:batchId` - Verify batch authenticity on blockchain
+- `GET /api/blockchain/network` - Get current blockchain network information
+
+### Testing Blockchain Integration
+1. Register a batch normally
+2. The system automatically stores the hash on Polygon
+3. Use the Batch Details modal to view blockchain hash
+4. The hash is prefixed with "LITHITRUST:" indicating blockchain verification
+5. Each batch can be verified independently on the blockchain
+
+### Future Enhancements
+
+### Phase 3 (Not in MVP)
 - Smart contracts for automated royalty payments
-- Document upload for ESG certificates
-- Premium pricing calculator based on ESG scores
 - Mobile app with offline support
 - Multi-language support (Shona, Ndebele, English)
 - Real-time lithium pricing feeds

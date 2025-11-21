@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { QrCode as QrCodeIcon, Download, MapPin, Package, Calendar, User, TrendingUp, FileText, Trash2, CheckCircle2, Clock } from "lucide-react";
+import { QrCode as QrCodeIcon, Download, MapPin, Package, Calendar, User, TrendingUp, FileText, Trash2, CheckCircle2, Clock, Shield, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Batch, SupplyChainEvent, EsgRecord, EsgDocument } from "@shared/schema";
 import { format } from "date-fns";
@@ -122,15 +122,35 @@ export function BatchDetailModal({ batch, open, onOpenChange }: BatchDetailModal
     ? Math.round((esg.environmentalScore + esg.socialScore + esg.governanceScore) / 3)
     : 0;
 
+  const getVerificationBadgeInfo = (status: string) => {
+    switch (status) {
+      case "government-certified":
+        return { color: "bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800", icon: CheckCircle2, label: "Government Certified", premium: "25-30%" };
+      case "auditor-verified":
+        return { color: "bg-blue-500/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800", icon: CheckCircle2, label: "Auditor Verified", premium: "10-25%" };
+      case "pending":
+        return { color: "bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800", icon: Clock, label: "Pending Verification", premium: "0-5%" };
+      default:
+        return { color: "bg-slate-500/20 text-slate-700 dark:text-slate-400 border-slate-200 dark:border-slate-800", icon: AlertCircle, label: "Unverified", premium: "0%" };
+    }
+  };
+
+  const verificationInfo = getVerificationBadgeInfo(batch.verificationStatus);
+  const VerificationIcon = verificationInfo.icon;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
+          <DialogTitle className="flex items-center gap-3 flex-wrap">
             <Package className="w-6 h-6 text-primary" />
             <span className="font-mono">{batch.batchNumber}</span>
             <Badge variant="default" className="capitalize">
               {batch.currentStage}
+            </Badge>
+            <Badge className={`capitalize border ${verificationInfo.color}`}>
+              <VerificationIcon className="w-3 h-3 mr-1" />
+              {verificationInfo.label}
             </Badge>
           </DialogTitle>
         </DialogHeader>
@@ -145,6 +165,45 @@ export function BatchDetailModal({ batch, open, onOpenChange }: BatchDetailModal
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6 mt-6">
+            {/* Verification Status Card */}
+            <div className={`p-6 rounded-md border ${verificationInfo.color}`}>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <Shield className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-semibold text-lg mb-1">Verification Status</h3>
+                    <p className="text-sm mb-3">{verificationInfo.label}</p>
+                    <div className="flex items-center gap-4">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Green Premium</p>
+                        <p className="font-bold text-lg">{verificationInfo.premium}</p>
+                      </div>
+                      {batch.verificationStatus === "unverified" && (
+                        <div className="text-xs text-muted-foreground bg-background/50 px-3 py-2 rounded">
+                          Upload documents to increase verification level
+                        </div>
+                      )}
+                      {batch.verificationStatus === "pending" && (
+                        <div className="text-xs text-muted-foreground bg-background/50 px-3 py-2 rounded">
+                          Awaiting auditor review of documents
+                        </div>
+                      )}
+                      {batch.verificationStatus === "auditor-verified" && (
+                        <div className="text-xs text-muted-foreground bg-background/50 px-3 py-2 rounded">
+                          Third-party auditor has verified this batch
+                        </div>
+                      )}
+                      {batch.verificationStatus === "government-certified" && (
+                        <div className="text-xs text-muted-foreground bg-background/50 px-3 py-2 rounded">
+                          Government certification approved for export
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Basic Information */}
             <div>
               <h3 className="text-lg font-semibold mb-4">Batch Information</h3>

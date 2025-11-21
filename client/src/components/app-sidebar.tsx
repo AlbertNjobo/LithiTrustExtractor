@@ -1,4 +1,4 @@
-import { Home, Package, Plus, FileText, DollarSign, Settings, LogOut } from "lucide-react";
+import { Home, Package, Plus, FileText, DollarSign, MessageCircle, Settings, LogOut } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -40,6 +40,11 @@ const menuItems = [
     title: "Reports",
     url: "/reports",
     icon: FileText,
+  },
+  {
+    title: "LithiBot",
+    url: "/chatbot",
+    icon: MessageCircle,
   },
 ];
 

@@ -14,6 +14,7 @@ import Register from "@/pages/register";
 import Reports from "@/pages/reports";
 import Pricing from "@/pages/pricing";
 import Settings from "@/pages/settings";
+import Chatbot from "@/pages/chatbot";
 import NotFound from "@/pages/not-found";
 
 function Router({ isAuthenticated }: { isAuthenticated: boolean }) {
@@ -28,6 +29,7 @@ function Router({ isAuthenticated }: { isAuthenticated: boolean }) {
           <Route path="/register" component={Register} />
           <Route path="/pricing" component={Pricing} />
           <Route path="/reports" component={Reports} />
+          <Route path="/chatbot" component={Chatbot} />
           <Route path="/settings" component={Settings} />
         </>
       )}

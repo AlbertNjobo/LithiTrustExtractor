@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { blockchain } from "./blockchain";
+import { chatWithLithiBot } from "./chatbot";
 import { insertBatchSchema, insertEsgRecordSchema, insertEsgDocumentSchema } from "@shared/schema";
 import { z } from "zod";
 
@@ -276,6 +277,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error getting blockchain network info:", error);
       res.status(500).json({ message: "Failed to get blockchain network info" });
+    }
+  });
+
+  // Chatbot endpoint
+  app.post("/api/chat", isAuthenticated, async (req: any, res) => {
+    try {
+      const { message, history } = req.body;
+
+      if (!message || typeof message !== "string") {
+        return res.status(400).json({ message: "Message is required" });
+      }
+
+      const response = await chatWithLithiBot(message, history || []);
+      res.json({ response });
+    } catch (error) {
+      console.error("Chatbot error:", error);
+      res.status(500).json({
+        message: "Failed to get chatbot response",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 

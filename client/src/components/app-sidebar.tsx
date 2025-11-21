@@ -1,4 +1,4 @@
-import { Home, Package, Plus, FileText, Settings, LogOut } from "lucide-react";
+import { Home, Package, Plus, FileText, DollarSign, Settings, LogOut } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -30,6 +30,11 @@ const menuItems = [
     title: "Register Batch",
     url: "/register",
     icon: Plus,
+  },
+  {
+    title: "Pricing Calculator",
+    url: "/pricing",
+    icon: DollarSign,
   },
   {
     title: "Reports",

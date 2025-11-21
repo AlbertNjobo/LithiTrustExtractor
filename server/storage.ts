@@ -164,6 +164,27 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updated || undefined;
   }
+
+  // ESG document operations
+  async uploadEsgDocument(doc: InsertEsgDocument): Promise<EsgDocument> {
+    const [newDoc] = await db
+      .insert(esgDocuments)
+      .values(doc)
+      .returning();
+    return newDoc;
+  }
+
+  async getBatchDocuments(batchId: string): Promise<EsgDocument[]> {
+    return await db
+      .select()
+      .from(esgDocuments)
+      .where(eq(esgDocuments.batchId, batchId))
+      .orderBy(desc(esgDocuments.createdAt));
+  }
+
+  async deleteDocument(docId: string): Promise<void> {
+    await db.delete(esgDocuments).where(eq(esgDocuments.id, docId));
+  }
 }
 
 export const storage = new DatabaseStorage();

@@ -12,6 +12,7 @@ import Home from "@/pages/home";
 import Batches from "@/pages/batches";
 import Register from "@/pages/register";
 import Reports from "@/pages/reports";
+import Pricing from "@/pages/pricing";
 import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 
@@ -25,6 +26,7 @@ function Router({ isAuthenticated }: { isAuthenticated: boolean }) {
           <Route path="/" component={Home} />
           <Route path="/batches" component={Batches} />
           <Route path="/register" component={Register} />
+          <Route path="/pricing" component={Pricing} />
           <Route path="/reports" component={Reports} />
           <Route path="/settings" component={Settings} />
         </>

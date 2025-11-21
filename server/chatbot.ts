@@ -1,8 +1,11 @@
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let genAI: GoogleGenerativeAI | null = null;
+
+// Initialize only if API key is available
+if (process.env.GOOGLE_AI_API_KEY) {
+  genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
+}
 
 const LITHITRUST_SYSTEM_PROMPT = `You are LithiBot, an AI assistant for LithiTrust - a blockchain-based lithium traceability platform in Zimbabwe. 
 
@@ -18,7 +21,6 @@ IMPORTANT GUIDELINES:
 - Be helpful and encouraging to small miners who may not be tech-savvy
 - Explain technical concepts in simple terms
 - Always provide specific examples with numbers when discussing pricing
-- Direct users to relevant docs (ESG_GUIDE.md, VERIFICATION_GUIDE.md, DEMO_SCENARIO.md)
 - Be realistic about requirements and processes
 - Support miners in earning higher green premiums through better ESG practices
 
@@ -37,45 +39,57 @@ Remember: You represent LithiTrust's values of transparency, fairness, and oppor
 
 export async function chatWithLithiBot(userMessage: string, conversationHistory: Array<{ role: string; content: string }>): Promise<string> {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error("OPENAI_API_KEY is not configured. Please add it to Replit Secrets.");
+    if (!genAI || !process.env.GOOGLE_AI_API_KEY) {
+      throw new Error("GOOGLE_AI_API_KEY not configured");
     }
 
-    // Convert conversation history to OpenAI format
-    const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+    // Try gemini-2.0-flash first, fall back to gemini-1.5-flash
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+    // Prepare conversation with system prompt
+    const messages = [
       {
-        role: "system",
+        role: "user",
         content: LITHITRUST_SYSTEM_PROMPT
       },
-      ...conversationHistory.map(msg => ({
-        role: (msg.role === "user" ? "user" : "assistant") as "user" | "assistant",
-        content: msg.content
-      })),
+      {
+        role: "model",
+        content: "I understand. I'm LithiBot, your AI assistant for LithiTrust. I'll help miners with ESG scoring, green premium pricing, blockchain verification, and lithium traceability. How can I help you today?"
+      },
+      ...conversationHistory,
       {
         role: "user",
         content: userMessage
       }
     ];
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: messages,
-      temperature: 0.7,
-      max_tokens: 500,
+    const chat = model.startChat({
+      history: messages.slice(0, -1).map(msg => ({
+        role: msg.role === "user" ? "user" : "model",
+        parts: [{ text: msg.content }]
+      }))
     });
 
-    const content = response.choices[0].message.content;
-    if (!content) {
-      throw new Error("No response content from OpenAI");
+    const result = await chat.sendMessage(userMessage);
+    const response = await result.response;
+    const text = response.text();
+    
+    if (!text) {
+      throw new Error("Empty response from Gemini");
     }
-
-    return content;
+    
+    return text;
   } catch (error) {
     console.error("Error in LithiBot chat:", error);
-    if (error instanceof Error && error.message.includes("OPENAI_API_KEY")) {
-      throw new Error("LithiBot is not configured. Please add OPENAI_API_KEY to Replit Secrets.");
+    
+    if (error instanceof Error && error.message.includes("GOOGLE_AI_API_KEY")) {
+      throw new Error("LithiBot is not configured. Please add GOOGLE_AI_API_KEY to Replit Secrets and try again.");
     }
-    throw new Error("Failed to get response from LithiBot. Please try again later.");
+    
+    // Return a helpful error message
+    throw new Error(
+      "Failed to get response from LithiBot. This could mean: (1) GOOGLE_AI_API_KEY is not set, or (2) your API key is invalid. Please check Replit Secrets and make sure you have a valid Google AI API key from https://aistudio.google.com/app/apikey"
+    );
   }
 }
 

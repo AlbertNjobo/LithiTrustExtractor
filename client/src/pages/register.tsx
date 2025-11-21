@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Package, MapPin, BarChart3, Shield, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Package, Leaf, BarChart3, Shield, Check } from "lucide-react";
 import { insertBatchSchema, insertEsgRecordSchema } from "@shared/schema";
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
@@ -31,10 +31,113 @@ const esgFormSchema = insertEsgRecordSchema.omit({ batchId: true }).extend({
 type BatchFormValues = z.infer<typeof batchFormSchema>;
 type EsgFormValues = z.infer<typeof esgFormSchema>;
 
+const ESG_QUESTIONS = [
+  {
+    id: "water",
+    category: "environmental",
+    question: "How much water do you use per kg of lithium?",
+    options: [
+      { label: "Very little (< 50 liters/kg)", score: 90 },
+      { label: "Low (50-100 liters/kg)", score: 75 },
+      { label: "Moderate (100-200 liters/kg)", score: 60 },
+      { label: "High (> 200 liters/kg)", score: 30 },
+    ],
+  },
+  {
+    id: "carbon",
+    category: "environmental",
+    question: "What is your carbon intensity?",
+    options: [
+      { label: "Very low (< 1 ton CO2/ton ore)", score: 85 },
+      { label: "Low (1-2 tons CO2/ton ore)", score: 70 },
+      { label: "Moderate (2-4 tons CO2/ton ore)", score: 50 },
+      { label: "High (> 4 tons CO2/ton ore)", score: 25 },
+    ],
+  },
+  {
+    id: "waste",
+    category: "environmental",
+    question: "How do you manage waste?",
+    options: [
+      { label: "Recycling & zero-waste practices", score: 90 },
+      { label: "Responsible disposal with monitoring", score: 70 },
+      { label: "Basic disposal practices", score: 45 },
+      { label: "No formal waste management", score: 10 },
+    ],
+  },
+  {
+    id: "childlabor",
+    category: "social",
+    question: "Do you ensure no child labor?",
+    options: [
+      { label: "Yes, verified & documented", score: 95 },
+      { label: "Yes, but not formally verified", score: 70 },
+      { label: "Unsure", score: 40 },
+      { label: "No formal policy", score: 10 },
+    ],
+  },
+  {
+    id: "community",
+    category: "social",
+    question: "Do you have community agreements?",
+    options: [
+      { label: "Yes, signed & benefits shared", score: 90 },
+      { label: "Yes, informal agreement", score: 65 },
+      { label: "Limited engagement", score: 35 },
+      { label: "No community agreement", score: 10 },
+    ],
+  },
+  {
+    id: "safety",
+    category: "social",
+    question: "What safety practices do you follow?",
+    options: [
+      { label: "Professional safety equipment & training", score: 85 },
+      { label: "Basic safety equipment", score: 60 },
+      { label: "Minimal safety practices", score: 30 },
+      { label: "No safety equipment", score: 5 },
+    ],
+  },
+  {
+    id: "license",
+    category: "governance",
+    question: "Do you have proper mining licenses?",
+    options: [
+      { label: "Yes, all licenses current", score: 95 },
+      { label: "Yes, some in process", score: 70 },
+      { label: "Pending licenses", score: 40 },
+      { label: "No formal licenses", score: 10 },
+    ],
+  },
+  {
+    id: "transparency",
+    category: "governance",
+    question: "How transparent are your records?",
+    options: [
+      { label: "Complete documentation, audited", score: 90 },
+      { label: "Good documentation", score: 70 },
+      { label: "Basic records kept", score: 45 },
+      { label: "Minimal record-keeping", score: 20 },
+    ],
+  },
+  {
+    id: "compliance",
+    category: "governance",
+    question: "Do you comply with regulations?",
+    options: [
+      { label: "Yes, fully compliant", score: 90 },
+      { label: "Mostly compliant", score: 65 },
+      { label: "Partial compliance", score: 40 },
+      { label: "Non-compliant", score: 10 },
+    ],
+  },
+];
+
 export default function Register() {
   const [, setLocation] = useLocation();
   const [step, setStep] = useState(1);
   const [batchData, setBatchData] = useState<BatchFormValues | null>(null);
+  const [esgAnswers, setEsgAnswers] = useState<Record<string, number>>({});
   const { toast } = useToast();
 
   const batchForm = useForm<BatchFormValues>({
@@ -68,6 +171,18 @@ export default function Register() {
     },
   });
 
+  const calculateScores = () => {
+    const envAnswers = Object.values(esgAnswers).filter((_, i) => i < 3);
+    const socialAnswers = Object.values(esgAnswers).filter((_, i) => i >= 3 && i < 6);
+    const govAnswers = Object.values(esgAnswers).filter((_, i) => i >= 6);
+
+    const env = envAnswers.length > 0 ? Math.round(envAnswers.reduce((a, b) => a + b) / envAnswers.length) : 0;
+    const social = socialAnswers.length > 0 ? Math.round(socialAnswers.reduce((a, b) => a + b) / socialAnswers.length) : 0;
+    const gov = govAnswers.length > 0 ? Math.round(govAnswers.reduce((a, b) => a + b) / govAnswers.length) : 0;
+
+    return { env, social, gov };
+  };
+
   const mutation = useMutation({
     mutationFn: async (data: { batch: BatchFormValues; esg: EsgFormValues }) => {
       const batchPayload = {
@@ -77,7 +192,7 @@ export default function Register() {
       };
       const batchResponse = await apiRequest("POST", "/api/batches", batchPayload);
       const batch = await batchResponse.json();
-      
+
       const esgPayload = {
         ...data.esg,
         batchId: batch.id,
@@ -85,7 +200,7 @@ export default function Register() {
         carbonIntensity: data.esg.carbonIntensity || null,
       };
       await apiRequest("POST", "/api/batches/esg", esgPayload);
-      
+
       return batch;
     },
     onSuccess: () => {
@@ -123,12 +238,24 @@ export default function Register() {
 
   const onEsgSubmit = (data: EsgFormValues) => {
     if (batchData) {
-      mutation.mutate({ batch: batchData, esg: data });
+      const scores = calculateScores();
+      mutation.mutate({
+        batch: batchData,
+        esg: {
+          ...data,
+          environmentalScore: scores.env,
+          socialScore: scores.social,
+          governanceScore: scores.gov,
+        },
+      });
     }
   };
 
+  const allQuestionsAnswered = ESG_QUESTIONS.every((q) => esgAnswers[q.id] !== undefined);
   const totalSteps = 2;
   const progressPercentage = (step / totalSteps) * 100;
+  const scores = calculateScores();
+  const overallScore = Math.round((scores.env + scores.social + scores.gov) / 3);
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -138,7 +265,7 @@ export default function Register() {
           Register New Batch
         </h1>
         <p className="text-muted-foreground">
-          Register a new lithium batch and record ESG compliance data
+          Register a new lithium batch with ESG compliance questionnaire
         </p>
       </div>
 
@@ -150,7 +277,7 @@ export default function Register() {
               Step {step} of {totalSteps}
             </span>
             <span className="text-sm text-muted-foreground">
-              {step === 1 ? "Batch Details" : "ESG Compliance"}
+              {step === 1 ? "Batch Details" : "ESG Questionnaire"}
             </span>
           </div>
           <Progress value={progressPercentage} />
@@ -310,7 +437,7 @@ export default function Register() {
 
                 <div className="flex justify-end">
                   <Button type="submit" data-testid="button-next-step">
-                    Next: ESG Data
+                    Next: ESG Calculator
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </div>
@@ -320,132 +447,173 @@ export default function Register() {
         </Card>
       )}
 
-      {/* Step 2: ESG Compliance */}
+      {/* Step 2: ESG Calculator */}
       {step === 2 && (
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center">
-                <Shield className="w-5 h-5 text-primary" />
+                <Leaf className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <CardTitle>ESG Compliance</CardTitle>
-                <CardDescription>Record environmental, social, and governance data. Your scores directly determine your green premium pricing (0-30% price increase). Need help? See ESG_GUIDE.md</CardDescription>
+                <CardTitle>ESG Questionnaire</CardTitle>
+                <CardDescription>Answer 9 simple questions about your practices. No measurements needed - just select what describes you best.</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <Form {...esgForm}>
               <form onSubmit={esgForm.handleSubmit(onEsgSubmit)} className="space-y-8">
-                {/* ESG Scores Section */}
+                {/* Environmental Questions */}
                 <div>
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-primary" />
-                    ESG Scores (Calculate using ESG_GUIDE.md)
+                    <span className="text-2xl">🌍</span>
+                    Environmental Practices
                   </h3>
-                  <div className="bg-secondary/50 p-4 rounded-md mb-4">
-                    <p className="text-sm text-muted-foreground">
-                      💡 <strong>How to calculate:</strong> Each score measures your practices. Environmental = water usage + carbon footprint. Social = child labor + community agreements. Governance = compliance + transparency. Your overall score = (E+S+G)÷3
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FormField
-                      control={esgForm.control}
-                      name="environmentalScore"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Environmental Score (0-100)</FormLabel>
-                          <FormControl>
-                            <Input type="number" min="0" max="100" {...field} onChange={e => field.onChange(parseInt(e.target.value))} placeholder="0" data-testid="input-environmental-score" />
-                          </FormControl>
-                          <p className="text-xs text-muted-foreground mt-1">Water usage, carbon emissions, rehabilitation</p>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={esgForm.control}
-                      name="socialScore"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Social Score (0-100)</FormLabel>
-                          <FormControl>
-                            <Input type="number" min="0" max="100" {...field} onChange={e => field.onChange(parseInt(e.target.value))} placeholder="0" data-testid="input-social-score" />
-                          </FormControl>
-                          <p className="text-xs text-muted-foreground mt-1">No child labor, community agreements, worker safety</p>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={esgForm.control}
-                      name="governanceScore"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Governance Score (0-100)</FormLabel>
-                          <FormControl>
-                            <Input type="number" min="0" max="100" {...field} onChange={e => field.onChange(parseInt(e.target.value))} placeholder="0" data-testid="input-governance-score" />
-                          </FormControl>
-                          <p className="text-xs text-muted-foreground mt-1">Licenses, compliance, transparency, audit records</p>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <div className="space-y-4">
+                    {ESG_QUESTIONS.filter((q) => q.category === "environmental").map((question) => (
+                      <Card key={question.id} className="border">
+                        <CardContent className="pt-4">
+                          <p className="font-medium mb-3">{question.question}</p>
+                          <div className="space-y-2">
+                            {question.options.map((option, idx) => (
+                              <Button
+                                key={idx}
+                                variant={esgAnswers[question.id] === option.score ? "default" : "outline"}
+                                className="w-full justify-start text-left h-auto py-3 px-4"
+                                type="button"
+                                onClick={() => setEsgAnswers({ ...esgAnswers, [question.id]: option.score })}
+                                data-testid={`button-answer-${question.id}-${idx}`}
+                              >
+                                <div className="flex items-start gap-3 w-full">
+                                  <div className="w-5 h-5 rounded border border-current flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    {esgAnswers[question.id] === option.score && <div className="w-3 h-3 bg-current rounded-sm" />}
+                                  </div>
+                                  <span>{option.label}</span>
+                                </div>
+                              </Button>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
                 </div>
 
-                {/* Detailed Environmental Data */}
+                {/* Social Questions */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-4">Environmental Details (Optional)</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={esgForm.control}
-                      name="waterUsage"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Water Usage (liters per ton of ore)</FormLabel>
-                          <FormControl>
-                            <Input type="number" step="0.01" placeholder="30000" {...field} data-testid="input-water-usage" />
-                          </FormControl>
-                          <p className="text-xs text-muted-foreground mt-1">Example: 30,000 = good recycling practices</p>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={esgForm.control}
-                      name="carbonIntensity"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Carbon Intensity (kg CO₂e per ton)</FormLabel>
-                          <FormControl>
-                            <Input type="number" step="0.01" placeholder="600" {...field} data-testid="input-carbon-intensity" />
-                          </FormControl>
-                          <p className="text-xs text-muted-foreground mt-1">Example: 600 = efficient equipment + some renewable energy</p>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <span className="text-2xl">👥</span>
+                    Social Practices
+                  </h3>
+                  <div className="space-y-4">
+                    {ESG_QUESTIONS.filter((q) => q.category === "social").map((question) => (
+                      <Card key={question.id} className="border">
+                        <CardContent className="pt-4">
+                          <p className="font-medium mb-3">{question.question}</p>
+                          <div className="space-y-2">
+                            {question.options.map((option, idx) => (
+                              <Button
+                                key={idx}
+                                variant={esgAnswers[question.id] === option.score ? "default" : "outline"}
+                                className="w-full justify-start text-left h-auto py-3 px-4"
+                                type="button"
+                                onClick={() => setEsgAnswers({ ...esgAnswers, [question.id]: option.score })}
+                                data-testid={`button-answer-${question.id}-${idx}`}
+                              >
+                                <div className="flex items-start gap-3 w-full">
+                                  <div className="w-5 h-5 rounded border border-current flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    {esgAnswers[question.id] === option.score && <div className="w-3 h-3 bg-current rounded-sm" />}
+                                  </div>
+                                  <span>{option.label}</span>
+                                </div>
+                              </Button>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
                 </div>
 
-                {/* Safety & Plans */}
+                {/* Governance Questions */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-4">Social & Safety Practices</h3>
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <span className="text-2xl">📋</span>
+                    Governance Practices
+                  </h3>
+                  <div className="space-y-4">
+                    {ESG_QUESTIONS.filter((q) => q.category === "governance").map((question) => (
+                      <Card key={question.id} className="border">
+                        <CardContent className="pt-4">
+                          <p className="font-medium mb-3">{question.question}</p>
+                          <div className="space-y-2">
+                            {question.options.map((option, idx) => (
+                              <Button
+                                key={idx}
+                                variant={esgAnswers[question.id] === option.score ? "default" : "outline"}
+                                className="w-full justify-start text-left h-auto py-3 px-4"
+                                type="button"
+                                onClick={() => setEsgAnswers({ ...esgAnswers, [question.id]: option.score })}
+                                data-testid={`button-answer-${question.id}-${idx}`}
+                              >
+                                <div className="flex items-start gap-3 w-full">
+                                  <div className="w-5 h-5 rounded border border-current flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    {esgAnswers[question.id] === option.score && <div className="w-3 h-3 bg-current rounded-sm" />}
+                                  </div>
+                                  <span>{option.label}</span>
+                                </div>
+                              </Button>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Score Summary */}
+                {allQuestionsAnswered && (
+                  <Card className="border-primary/20 bg-primary/5">
+                    <CardContent className="pt-6">
+                      <div className="grid grid-cols-4 gap-4">
+                        <div className="text-center">
+                          <p className="text-xs text-muted-foreground">Environmental</p>
+                          <p className="text-2xl font-bold text-green-600">{scores.env}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-xs text-muted-foreground">Social</p>
+                          <p className="text-2xl font-bold text-blue-600">{scores.social}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-xs text-muted-foreground">Governance</p>
+                          <p className="text-2xl font-bold text-purple-600">{scores.gov}</p>
+                        </div>
+                        <div className="text-center border-l">
+                          <p className="text-xs text-muted-foreground">Overall</p>
+                          <p className="text-2xl font-bold text-primary">{overallScore}</p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-4 text-center">
+                        Green Premium: <span className="font-bold text-green-600">+{Math.round((overallScore / 100) * 30)}%</span>
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Additional Details */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Additional Details (Optional)</h3>
                   <div className="space-y-4">
                     <FormField
                       control={esgForm.control}
                       name="safetyPractices"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Worker Safety Practices (Optional)</FormLabel>
+                          <FormLabel>Worker Safety Practices</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="Example: All workers receive 8-hour safety training. We provide hard hats, masks, gloves, boots. Safety committee meets monthly. Zero accidents in last year..." {...field} data-testid="textarea-safety-practices" />
+                            <Textarea placeholder="Example: All workers receive safety training. We provide protective equipment..." {...field} data-testid="textarea-safety-practices" />
                           </FormControl>
-                          <p className="text-xs text-muted-foreground mt-1">Describe your worker protection measures and safety records</p>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -456,11 +624,10 @@ export default function Register() {
                       name="rehabilitationPlan"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Land Rehabilitation Plan (Optional)</FormLabel>
+                          <FormLabel>Land Rehabilitation Plan</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="Example: After mining ends, we will rehabilitate areas over 3 years. Plant 10,000 indigenous trees. Restore water sources. Monthly monitoring. Budget: $50,000..." {...field} data-testid="textarea-rehabilitation-plan" />
+                            <Textarea placeholder="Example: We will rehabilitate mined areas by planting indigenous trees..." {...field} data-testid="textarea-rehabilitation-plan" />
                           </FormControl>
-                          <p className="text-xs text-muted-foreground mt-1">Describe your plan to restore mined areas after extraction</p>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -473,7 +640,7 @@ export default function Register() {
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Back
                   </Button>
-                  <Button type="submit" disabled={mutation.isPending} data-testid="button-submit-batch">
+                  <Button type="submit" disabled={mutation.isPending || !allQuestionsAnswered} data-testid="button-submit-batch">
                     {mutation.isPending ? (
                       "Registering..."
                     ) : (

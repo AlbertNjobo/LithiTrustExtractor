@@ -212,6 +212,13 @@ npm run db:push
 - `REPL_ID` - Replit OAuth client ID
 - `ISSUER_URL` - OAuth issuer URL
 
+### WhatsApp Integration (Configured ✓)
+- `TWILIO_ACCOUNT_SID` - Twilio account identifier
+- `TWILIO_AUTH_TOKEN` - Twilio authentication token
+- `TWILIO_WHATSAPP_NUMBER` - WhatsApp sandbox or business number
+
+**See WHATSAPP_SETUP.md and WHATSAPP_TESTING.md for detailed configuration**
+
 ### Optional Blockchain Variables (For Full Blockchain Functionality)
 - `POLYGON_RPC_URL` - Polygon RPC endpoint (default: public Mumbai RPC)
 - `BLOCKCHAIN_PRIVATE_KEY` - Wallet private key for signing transactions
@@ -254,14 +261,30 @@ LithiTrust now integrates with **Polygon Mumbai Testnet** (Layer 2) for blockcha
 4. The hash is prefixed with "LITHITRUST:" indicating blockchain verification
 5. Each batch can be verified independently on the blockchain
 
-### Future Enhancements
+### WhatsApp Integration (IMPLEMENTED ✓)
+
+LithiBot is now available on WhatsApp for small-scale miners to:
+- Get instant regulatory guidance without login
+- Calculate green premium pricing for their batches
+- Understand ESG compliance requirements
+- Learn about blockchain verification
+- Access step-by-step guidance in simple language
+- Works on basic phones with WhatsApp installed
+
+**WebHook Endpoint:** `POST/GET /api/whatsapp/webhook`
+**Session Management:** 30-minute conversation sessions per phone number
+**Features:** Multi-turn conversations with context, character limit handling, auto-cleanup
+
+See WHATSAPP_SETUP.md and WHATSAPP_TESTING.md for configuration and testing.
+
+## Future Enhancements
 
 ### Phase 3 (Not in MVP)
 - Smart contracts for automated royalty payments
 - Mobile app with offline support
 - Multi-language support (Shona, Ndebele, English)
 - Real-time lithium pricing feeds
-- WhatsApp AI assistant (LithiBot)
+- SMS support for feature phones (SMS fallback)
 
 ## Project Structure
 

@@ -1,6 +1,8 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || "");
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 const LITHITRUST_SYSTEM_PROMPT = `You are LithiBot, an AI assistant for LithiTrust - a blockchain-based lithium traceability platform in Zimbabwe. 
 
@@ -35,42 +37,45 @@ Remember: You represent LithiTrust's values of transparency, fairness, and oppor
 
 export async function chatWithLithiBot(userMessage: string, conversationHistory: Array<{ role: string; content: string }>): Promise<string> {
   try {
-    if (!process.env.GOOGLE_AI_API_KEY) {
-      throw new Error("GOOGLE_AI_API_KEY is not configured. Please add it to Replit Secrets.");
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY is not configured. Please add it to Replit Secrets.");
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-    // Prepare conversation with system prompt
-    const messages = [
+    // Convert conversation history to OpenAI format
+    const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
       {
-        role: "user",
+        role: "system",
         content: LITHITRUST_SYSTEM_PROMPT
       },
-      {
-        role: "model",
-        content: "I understand. I'm LithiBot, assistant for LithiTrust. I'll help miners with ESG scoring, green premium pricing, blockchain verification, and all aspects of lithium traceability. How can I help you today?"
-      },
-      ...conversationHistory,
+      ...conversationHistory.map(msg => ({
+        role: (msg.role === "user" ? "user" : "assistant") as "user" | "assistant",
+        content: msg.content
+      })),
       {
         role: "user",
         content: userMessage
       }
     ];
 
-    const chat = model.startChat({
-      history: messages.slice(0, -1).map(msg => ({
-        role: msg.role === "user" ? "user" : "model",
-        parts: [{ text: msg.content }]
-      }))
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: messages,
+      temperature: 0.7,
+      max_tokens: 500,
     });
 
-    const result = await chat.sendMessage(userMessage);
-    const response = await result.response;
-    return response.text();
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error("No response content from OpenAI");
+    }
+
+    return content;
   } catch (error) {
     console.error("Error in LithiBot chat:", error);
-    throw new Error("Failed to get response from LithiBot. Please check your GOOGLE_AI_API_KEY.");
+    if (error instanceof Error && error.message.includes("OPENAI_API_KEY")) {
+      throw new Error("LithiBot is not configured. Please add OPENAI_API_KEY to Replit Secrets.");
+    }
+    throw new Error("Failed to get response from LithiBot. Please try again later.");
   }
 }
 

@@ -35,7 +35,11 @@ Remember: You represent LithiTrust's values of transparency, fairness, and oppor
 
 export async function chatWithLithiBot(userMessage: string, conversationHistory: Array<{ role: string; content: string }>): Promise<string> {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    if (!process.env.GOOGLE_AI_API_KEY) {
+      throw new Error("GOOGLE_AI_API_KEY is not configured. Please add it to Replit Secrets.");
+    }
+
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     // Prepare conversation with system prompt
     const messages = [
